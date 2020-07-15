@@ -2,6 +2,7 @@ package com.dongldh.fike
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import com.dongldh.fike.util.Permissions
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
@@ -20,5 +21,6 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
 
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
+        Permissions(applicationContext, mMap).permissionLocation()
     }
 }
