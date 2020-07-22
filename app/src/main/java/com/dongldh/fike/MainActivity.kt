@@ -2,25 +2,17 @@ package com.dongldh.fike
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import com.dongldh.fike.util.Permissions
-import com.google.android.gms.maps.GoogleMap
-import com.google.android.gms.maps.OnMapReadyCallback
-import com.google.android.gms.maps.SupportMapFragment
+import kotlinx.android.synthetic.main.activity_main.*
+import net.daum.mf.map.api.MapView
 
-class MainActivity : AppCompatActivity(), OnMapReadyCallback {
-
-    private lateinit var mMap: GoogleMap
+class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        val mapFragment = supportFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
-        mapFragment.getMapAsync(this)
+        val map = MapView(this)
+        mapView.addView(map)
     }
 
-    override fun onMapReady(googleMap: GoogleMap) {
-        mMap = googleMap
-        Permissions(applicationContext, mMap).permissionLocation()
-    }
 }
