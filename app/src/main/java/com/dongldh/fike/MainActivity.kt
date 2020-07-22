@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
+import com.dongldh.fike.retrofit.RetrofitClient
 import com.dongldh.fike.util.DEFAULT_ZOOM_LEVEL
 import com.dongldh.fike.util.Hash
 import com.dongldh.fike.util.Permissions
@@ -13,6 +14,11 @@ import net.daum.mf.map.api.CameraPosition
 import net.daum.mf.map.api.CameraUpdateFactory
 import net.daum.mf.map.api.MapPoint
 import net.daum.mf.map.api.MapView
+import org.json.JSONArray
+import org.json.JSONObject
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
 // 인터페이스를 이런식으로 액티비티 내에서 직접 구현해서 사용해야하네... object로 넣어주면 먹히지가 않음..ㅋㅋ
 class MainActivity : AppCompatActivity(), MapView.MapViewEventListener, MapView.CurrentLocationEventListener {
@@ -36,6 +42,20 @@ class MainActivity : AppCompatActivity(), MapView.MapViewEventListener, MapView.
 
         map.setMapViewEventListener(this)
         map.setCurrentLocationEventListener(this)
+
+        val retrofitClient = RetrofitClient()
+        val call = retrofitClient.apiService.getRetrofitData("1", "20")
+        call.enqueue(object: Callback<JSONObject> {
+            override fun onFailure(call: Call<JSONObject>, t: Throwable) {
+                Log.d("retrofitError", t.message!!)
+                Toast.makeText(this@MainActivity, "데이터 받아오기 실패", Toast.LENGTH_SHORT).show()
+            }
+
+            override fun onResponse(call: Call<JSONObject>, response: Response<JSONObject>) {
+                Toast.makeText(this@MainActivity, "데이터 받아오기 성공", Toast.LENGTH_SHORT).show()
+            }
+
+        })
     }
 
     override fun onMapViewDoubleTapped(p0: MapView?, p1: MapPoint?) {
