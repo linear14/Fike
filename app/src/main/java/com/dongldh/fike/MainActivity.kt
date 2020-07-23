@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
+import com.dongldh.fike.data.StationPOJO
 import com.dongldh.fike.retrofit.RetrofitClient
 import com.dongldh.fike.util.DEFAULT_ZOOM_LEVEL
 import com.dongldh.fike.util.Hash
@@ -45,14 +46,30 @@ class MainActivity : AppCompatActivity(), MapView.MapViewEventListener, MapView.
 
         val retrofitClient = RetrofitClient()
         val call = retrofitClient.apiService.getRetrofitData("1", "20")
-        call.enqueue(object: Callback<JSONObject> {
-            override fun onFailure(call: Call<JSONObject>, t: Throwable) {
+        call.enqueue(object: Callback<StationPOJO> {
+            override fun onFailure(call: Call<StationPOJO>, t: Throwable) {
                 Log.d("retrofitError", t.message!!)
-                Toast.makeText(this@MainActivity, "데이터 받아오기 실패", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this@MainActivity, "서버 접속 실패", Toast.LENGTH_SHORT).show()
             }
 
-            override fun onResponse(call: Call<JSONObject>, response: Response<JSONObject>) {
-                Toast.makeText(this@MainActivity, "데이터 받아오기 성공", Toast.LENGTH_SHORT).show()
+            override fun onResponse(call: Call<StationPOJO>, response: Response<StationPOJO>) {
+                Toast.makeText(this@MainActivity, "서버 접속 성공", Toast.LENGTH_SHORT).show()
+                Log.d("retrofit", response?.body().toString())
+                if(response.isSuccessful) {
+                    Log.d("retrofitData", "데이터 받아오기 성공")
+
+                    val rentBikeStatus = response.body()!!.rentBikeStatus
+                    // val listTotalCount = rentBikeStatus.listTotalCount
+                    val dataArray = rentBikeStatus.row
+
+                    for (data in dataArray) {
+                        // 룸 데이터베이스에 값 모두 집어넣기
+                        val stationId = data.stationId
+                        Log.d("stationId", stationId)
+                    }
+                } else {
+                    Log.d("retrofitData", "데이터 받아오기 실패")
+                }
             }
 
         })
