@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">Fike</string>
+
+    <string name="search_bar_text">따릉이 정류장을 검색해보세요!</string>
 </resources>
