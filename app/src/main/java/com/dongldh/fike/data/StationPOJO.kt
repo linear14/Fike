@@ -38,9 +38,9 @@ data class Row(
     @SerializedName("stationName")
     @Expose
     val stationName: String,
-    @SerializedName("parkingBikeToCnt")
+    @SerializedName("parkingBikeTotCnt")
     @Expose
-    val parkingBikeToCnt: Int,
+    val parkingBikeTotCnt: Int,
     @SerializedName("stationLatitude")
     @Expose
     val latitude: Double,
@@ -49,7 +49,7 @@ data class Row(
     val longitude: Double,
     @SerializedName("rackToCnt")
     @Expose
-    val rackToCnt: Int,
+    val rackTotCnt: Int,
     @SerializedName("shared")
     @Expose
     val shared: Int

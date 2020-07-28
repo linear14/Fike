@@ -67,7 +67,7 @@ class RetrofitClient(val context: Context) {
 
                     for (data in dataArray) {
                         // 룸 데이터베이스에 값 모두 집어넣기
-                        stationsList.add(Station(data.stationId, data.stationName, data.parkingBikeToCnt, data.latitude, data.longitude))
+                        stationsList.add(Station(data.stationId, data.stationName, data.parkingBikeTotCnt, data.latitude, data.longitude))
 
                         // 동시에 (2km 이내)에 존재하는 데이터일 경우 지도에 표시하는 로직을 추가 (임시로직) 렉 미쳐버려따
                         /*val marker = MapPOIItem()

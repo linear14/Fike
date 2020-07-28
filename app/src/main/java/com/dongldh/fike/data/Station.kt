@@ -8,7 +8,7 @@ data class Station(
     @PrimaryKey
     val stationId: String,
     val stationName: String,
-    val parkingBikeToCnt: Int,
+    val parkingBikeTotCnt: Int,
     val latitude: Double,
     val longitude: Double
 ){
