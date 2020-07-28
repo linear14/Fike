@@ -100,6 +100,7 @@
             android:padding="10dp"
             android:text="남은 자전거순"
             android:textSize="14sp"
+            android:textColor="#444444"
             android:fontFamily="@font/app_main_font"
             android:background="@drawable/not_selected_box"/>
 

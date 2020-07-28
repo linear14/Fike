@@ -2,6 +2,7 @@ package com.dongldh.fike
 
 import android.content.Context
 import android.graphics.Camera
+import android.graphics.Color
 import android.location.Location
 import android.os.*
 import androidx.appcompat.app.AppCompatActivity
@@ -39,6 +40,8 @@ class MainActivity : AppCompatActivity(), MapView.MapViewEventListener, MapView.
     var myLocationMapPoint: MapPoint? = null
     lateinit var map: MapView
     lateinit var bottomSheetBehavior: BottomSheetBehavior<View>
+    var nowResultStyle = 0 // 0 이면 거리순, 1 이면 남은 자전거순
+
     // var stationRepository: StationRepository? = null
 
     @RequiresApi(Build.VERSION_CODES.M)
@@ -117,18 +120,49 @@ class MainActivity : AppCompatActivity(), MapView.MapViewEventListener, MapView.
                         selectedPairList.add(Pair(station, distance))
                     }
                 }
-                runOnUiThread() {
-                    bottomSheet.recycler.layoutManager = LinearLayoutManager(this)
-                    bottomSheet.recycler.adapter = ResultAdapter(this, selectedPairList)
-                    bottomSheetBehavior.state = BottomSheetBehavior.STATE_HALF_EXPANDED
-                }
+                if(nowResultStyle == 0) listOrderingByDistance(selectedPairList) else listOrderingByRemainingBikes(selectedPairList)
             }
         }
 
+        bottomSheet.show_distance.setOnClickListener {
+            nowResultStyle = 0
+            bottomSheet.show_distance.setTextColor(Color.WHITE)
+            bottomSheet.show_distance.setBackgroundResource(R.drawable.selected_box)
+            bottomSheet.show_remain_bikes.setTextColor(Color.DKGRAY)
+            bottomSheet.show_remain_bikes.setBackgroundResource(R.drawable.not_selected_box)
+            listOrderingByDistance(selectedPairList)
+        }
+
+        bottomSheet.show_remain_bikes.setOnClickListener {
+            nowResultStyle = 1
+            bottomSheet.show_distance.setTextColor(Color.DKGRAY)
+            bottomSheet.show_distance.setBackgroundResource(R.drawable.not_selected_box)
+            bottomSheet.show_remain_bikes.setTextColor(Color.WHITE)
+            bottomSheet.show_remain_bikes.setBackgroundResource(R.drawable.selected_box)
+            listOrderingByRemainingBikes(selectedPairList)
+        }
+
+    }
+    private fun changeRecyclerViewStateOnUiThread(list: MutableList<Pair<Station, Double>>) {
+        runOnUiThread() {
+            bottomSheet.recycler.layoutManager = LinearLayoutManager(this)
+            bottomSheet.recycler.adapter = ResultAdapter(this, list)
+            if(bottomSheetBehavior.state != BottomSheetBehavior.STATE_EXPANDED) bottomSheetBehavior.state = BottomSheetBehavior.STATE_HALF_EXPANDED
+        }
+    }
+
+    private fun listOrderingByDistance(list: MutableList<Pair<Station, Double>>) {
+        list.sortBy { it.second }
+        changeRecyclerViewStateOnUiThread(list)
+    }
+
+    private fun listOrderingByRemainingBikes(list: MutableList<Pair<Station, Double>>) {
+        list.sortByDescending { it.first.parkingBikeTotCnt }
+        changeRecyclerViewStateOnUiThread(list)
     }
 
 
-    fun distanceByDegree(lat1: Double, lon1: Double, lat2: Double, lon2: Double): Double {
+    private fun distanceByDegree(lat1: Double, lon1: Double, lat2: Double, lon2: Double): Double {
         val start = Location("A")
         val end = Location("B")
 
@@ -140,7 +174,7 @@ class MainActivity : AppCompatActivity(), MapView.MapViewEventListener, MapView.
         return start.distanceTo(end).toDouble()
     }
 
-    fun calDistance(lat1: Double, lon1: Double, lat2: Double, lon2: Double): Double {
+    /*fun calDistance(lat1: Double, lon1: Double, lat2: Double, lon2: Double): Double {
         val theta = lon1 - lon2
         var dist = sin(degToRad(lat1)) * sin(degToRad(lat2)) +
                 cos(degToRad(lat1)) * cos(degToRad(lat2)) * cos(degToRad(theta))
@@ -151,7 +185,7 @@ class MainActivity : AppCompatActivity(), MapView.MapViewEventListener, MapView.
     }
 
     fun degToRad(deg: Double): Double = (deg * Math.PI) / 180
-    fun radToDeg(rad: Double): Double = (rad * 180 / Math.PI)
+    fun radToDeg(rad: Double): Double = (rad * 180 / Math.PI)*/
 
 
     // MapView.MapViewEventListener
