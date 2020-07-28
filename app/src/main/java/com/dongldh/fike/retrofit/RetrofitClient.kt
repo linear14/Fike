@@ -9,6 +9,9 @@ import com.dongldh.fike.data.AppDatabase
 import com.dongldh.fike.data.Station
 import com.dongldh.fike.data.StationPOJO
 import com.google.gson.GsonBuilder
+import net.daum.mf.map.api.MapPOIItem
+import net.daum.mf.map.api.MapPoint
+import net.daum.mf.map.api.MapView
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Call
@@ -41,8 +44,9 @@ class RetrofitClient(val context: Context) {
         return okhttpClientBuilder
     }
 
+    val stationsList = mutableSetOf<Station>()
+
     fun getAllDatasFromRetrofit(start: Int, end: Int, total: Int) {
-        val stationsList = mutableSetOf<Station>()
         val call = this.apiService.getRetrofitData(start.toString(), end.toString())
 
         call.enqueue(object: Callback<StationPOJO> {
@@ -64,6 +68,15 @@ class RetrofitClient(val context: Context) {
                     for (data in dataArray) {
                         // 룸 데이터베이스에 값 모두 집어넣기
                         stationsList.add(Station(data.stationId, data.stationName, data.parkingBikeToCnt, data.latitude, data.longitude))
+
+                        // 동시에 (2km 이내)에 존재하는 데이터일 경우 지도에 표시하는 로직을 추가 (임시로직) 렉 미쳐버려따
+                        /*val marker = MapPOIItem()
+                        marker.itemName = data.stationName
+                        marker.mapPoint = MapPoint.mapPointWithGeoCoord(data.latitude, data.longitude)
+                        marker.markerType = MapPOIItem.MarkerType.BluePin // 기본으로 제공하는 BluePin 마커 모양.
+                        marker.selectedMarkerType = MapPOIItem.MarkerType.RedPin // 마커를 클릭했을때, 기본으로 제공하는 RedPin 마커 모양.
+                        mapView.addPOIItem(marker)*/
+
                         /*val stationId = data.stationId
                         Log.d("stationId", stationId)*/
                     }
@@ -75,7 +88,6 @@ class RetrofitClient(val context: Context) {
                         // deprecated 될 예정. 더 좋은 방법은?
                         AsyncTask.execute {
                             val db = AppDatabase.getInstance(context.applicationContext)
-                            db.stationDao().deleteAll()
                             db.stationDao().insertStations(stationsList)
                         }
                     }

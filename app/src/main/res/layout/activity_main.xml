@@ -34,6 +34,16 @@
             android:src="@mipmap/ic_launcher"
             android:scaleType="centerCrop"/>
 
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/findBikeFab"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="16dp"
+            android:layout_marginBottom="16dp"
+            android:backgroundTint="#ffffff"
+            android:src="@mipmap/ic_launcher"
+            android:scaleType="centerCrop"/>
+
     </LinearLayout>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
