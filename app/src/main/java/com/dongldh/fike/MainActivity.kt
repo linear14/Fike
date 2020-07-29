@@ -12,6 +12,8 @@ import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.LinearSmoothScroller
+import androidx.recyclerview.widget.RecyclerView
 import com.dongldh.fike.adapter.ResultAdapter
 import com.dongldh.fike.data.*
 import com.dongldh.fike.retrofit.RetrofitClient
@@ -21,7 +23,9 @@ import com.dongldh.fike.util.Permissions
 import com.google.android.material.bottomnavigation.BottomNavigationMenu
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.android.synthetic.main.fragment_result.*
 import kotlinx.android.synthetic.main.fragment_result.view.*
+import kotlinx.android.synthetic.main.fragment_result.view.recycler
 import kotlinx.coroutines.handleCoroutineException
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.selects.select
@@ -36,11 +40,12 @@ import kotlin.math.cos
 import kotlin.math.sin
 
 // 인터페이스를 이런식으로 액티비티 내에서 직접 구현해서 사용해야하네... object로 넣어주면 먹히지가 않음..ㅋㅋ
-class MainActivity : AppCompatActivity(), MapView.MapViewEventListener, MapView.CurrentLocationEventListener {
+class MainActivity : AppCompatActivity(), MapView.MapViewEventListener, MapView.CurrentLocationEventListener, MapView.POIItemEventListener {
     var myLocationMapPoint: MapPoint? = null
     lateinit var map: MapView
     lateinit var bottomSheetBehavior: BottomSheetBehavior<View>
     var nowResultStyle = 0 // 0 이면 거리순, 1 이면 남은 자전거순
+    lateinit var selectedPairList: MutableList<Pair<Station, Double>>
 
     // var stationRepository: StationRepository? = null
 
@@ -63,6 +68,7 @@ class MainActivity : AppCompatActivity(), MapView.MapViewEventListener, MapView.
 
         map.setMapViewEventListener(this)
         map.setCurrentLocationEventListener(this)
+        map.setPOIItemEventListener(this)
 
         RetrofitClient(applicationContext).getAllDatasFromRetrofit(1, 1000, 0)
 
@@ -90,7 +96,7 @@ class MainActivity : AppCompatActivity(), MapView.MapViewEventListener, MapView.
         })
 
         // 지정된 Station을 거리와 함께 map으로 저장
-        val selectedPairList = mutableListOf<Pair<Station, Double>>()
+        selectedPairList = mutableListOf<Pair<Station, Double>>()
 
         findBikeFab.setOnClickListener {
             // 초기화 작업
@@ -146,7 +152,7 @@ class MainActivity : AppCompatActivity(), MapView.MapViewEventListener, MapView.
     private fun changeRecyclerViewStateOnUiThread(list: MutableList<Pair<Station, Double>>) {
         runOnUiThread() {
             bottomSheet.recycler.layoutManager = LinearLayoutManager(this)
-            bottomSheet.recycler.adapter = ResultAdapter(this, list)
+            bottomSheet.recycler.adapter = ResultAdapter(context = this, list = list, map = map, bottomSheetBehavior = bottomSheetBehavior, recycler = recycler)
             if(bottomSheetBehavior.state != BottomSheetBehavior.STATE_EXPANDED) bottomSheetBehavior.state = BottomSheetBehavior.STATE_HALF_EXPANDED
         }
     }
@@ -232,6 +238,38 @@ class MainActivity : AppCompatActivity(), MapView.MapViewEventListener, MapView.
     }
 
     override fun onCurrentLocationDeviceHeadingUpdate(p0: MapView?, p1: Float) {
+    }
+
+
+    // MapView.POIItemEventListener
+    override fun onCalloutBalloonOfPOIItemTouched(p0: MapView?, p1: MapPOIItem?) {
+    }
+
+    override fun onCalloutBalloonOfPOIItemTouched(
+        p0: MapView?,
+        p1: MapPOIItem?,
+        p2: MapPOIItem.CalloutBalloonButtonType?
+    ) {
+    }
+
+    override fun onDraggablePOIItemMoved(p0: MapView?, p1: MapPOIItem?, p2: MapPoint?) {
+    }
+
+    override fun onPOIItemSelected(mapView: MapView, item: MapPOIItem) {
+        mapView.moveCamera(CameraUpdateFactory.newCameraPosition(CameraPosition(item.mapPoint, mapView.zoomLevelFloat)))
+        val smoothScroller: RecyclerView.SmoothScroller by lazy {
+            object : LinearSmoothScroller(this) {
+                override fun getVerticalSnapPreference(): Int = SNAP_TO_START
+            }
+        }
+        // 선택한 아이템의 position을 구하고, recyclerView 맨 위에 보이도록 올려주는 작업
+        for(index in 0 until selectedPairList.size) {
+            if(selectedPairList[index].first.stationName == item.itemName) {
+                smoothScroller.targetPosition = index
+                break
+            }
+        }
+        bottomSheet.recycler.layoutManager?.startSmoothScroll(smoothScroller)
     }
 
 }
