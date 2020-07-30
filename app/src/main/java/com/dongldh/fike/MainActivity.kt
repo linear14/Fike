@@ -47,6 +47,8 @@ class MainActivity : AppCompatActivity(), MapView.MapViewEventListener, MapView.
     var nowResultStyle = 0 // 0 이면 거리순, 1 이면 남은 자전거순
     lateinit var selectedPairList: MutableList<Pair<Station, Double>>
 
+    lateinit var resultAdapter: ResultAdapter
+
     // var stationRepository: StationRepository? = null
 
     @RequiresApi(Build.VERSION_CODES.M)
@@ -151,8 +153,9 @@ class MainActivity : AppCompatActivity(), MapView.MapViewEventListener, MapView.
     }
     private fun changeRecyclerViewStateOnUiThread(list: MutableList<Pair<Station, Double>>) {
         runOnUiThread() {
+            resultAdapter = ResultAdapter(context = this, list = list, map = map, bottomSheetBehavior = bottomSheetBehavior, recycler = recycler)
             bottomSheet.recycler.layoutManager = LinearLayoutManager(this)
-            bottomSheet.recycler.adapter = ResultAdapter(context = this, list = list, map = map, bottomSheetBehavior = bottomSheetBehavior, recycler = recycler)
+            bottomSheet.recycler.adapter = resultAdapter
             if(bottomSheetBehavior.state != BottomSheetBehavior.STATE_EXPANDED) bottomSheetBehavior.state = BottomSheetBehavior.STATE_HALF_EXPANDED
         }
     }
@@ -266,10 +269,12 @@ class MainActivity : AppCompatActivity(), MapView.MapViewEventListener, MapView.
         for(index in 0 until selectedPairList.size) {
             if(selectedPairList[index].first.stationName == item.itemName) {
                 smoothScroller.targetPosition = index
+                resultAdapter.updateNotifyItemChanged(index)
                 break
             }
         }
         bottomSheet.recycler.layoutManager?.startSmoothScroll(smoothScroller)
+
     }
 
 }

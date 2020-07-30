@@ -37,6 +37,7 @@ class ResultAdapter(
 ) : RecyclerView.Adapter<ResultViewHolder>() {
 
     val string = context.getString(R.string.station_result_text)
+    var selectedPosition = -1
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ResultViewHolder {
         return ResultViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.item_result, parent, false))
@@ -60,6 +61,12 @@ class ResultAdapter(
         Log.d("resultString2", spannable.toString())
         holder.detail.text = spannable
 
+        if(position == selectedPosition) {
+            holder.itemView.setBackgroundColor((Color.parseColor("#F5F6F8")))
+        } else {
+            holder.itemView.setBackgroundColor((Color.parseColor("#FFFFFF")))
+        }
+
         // 검색 결과 view를 클릭하면 화면에 marker가 선택되도록 구현 + 부가기능
         holder.itemView.setOnClickListener {
             val items = map.poiItems
@@ -80,7 +87,13 @@ class ResultAdapter(
                     break
                 }
             }
-
+            updateNotifyItemChanged(position)
         }
+    }
+
+    fun updateNotifyItemChanged(position: Int) {
+        notifyItemChanged(position)
+        notifyItemChanged(selectedPosition)
+        selectedPosition = position
     }
 }
