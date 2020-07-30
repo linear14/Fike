@@ -1,50 +1,196 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/coordinator"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context=".MainActivity">
+    xmlns:tools="http://schemas.android.com/tools">
 
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/mapView"
+    <data>
+        <variable
+            name="viewModel"
+            type="com.dongldh.fike.viewmodel.MainViewModel" />
+        <variable
+            name="callback"
+            type="com.dongldh.fike.MainActivity.Callback" />
+    </data>
+
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
+        android:id="@+id/coordinator"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        tools:context=".MainActivity">
 
-    <include
-        android:id="@+id/bottomSheet"
-        layout="@layout/fragment_result" />
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/mapView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
 
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        app:layout_anchor="@id/bottomSheet"
-        app:layout_anchorGravity="end"
-        android:layout_gravity="end">
+        <!--<include
+            android:id="@+id/bottomSheet"
+            layout="@layout/fragment_result" />-->
 
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/myLocationFab"
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/bottomSheet"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:layout_behavior="@string/bottom_sheet_behavior"
+            app:behavior_peekHeight="106dp"
+            app:behavior_hideable="false"
+            android:background="@android:color/white">
+
+            <TextView
+                android:id="@+id/sign_drawer"
+                android:layout_width="60dp"
+                android:layout_height="2dp"
+                android:background="#000000"
+                android:layout_marginTop="16dp"
+                android:layout_marginHorizontal="24dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"/>
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/search_layout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginVertical="16dp"
+                android:layout_marginHorizontal="24dp"
+                android:background="@drawable/gray_round_layout"
+                android:paddingHorizontal="16dp"
+                android:paddingVertical="4dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/sign_drawer">
+
+                <AutoCompleteTextView
+                    android:id="@+id/search_bar"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:background="@android:color/transparent"
+                    android:layout_marginEnd="16dp"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toStartOf="@id/search_image"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    android:hint="@string/search_bar_text"
+                    android:fontFamily="@font/app_main_font"
+                    android:textSize="12sp"
+                    android:gravity="center"/>
+
+                <ImageView
+                    android:id="@+id/search_image"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    android:src="@mipmap/ic_launcher"/>
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <TextView
+                android:id="@+id/separator1"
+                android:layout_width="match_parent"
+                android:layout_height="2dp"
+                android:background="#eeeeee"
+                android:layout_marginTop="16dp"
+                android:layout_marginHorizontal="24dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/search_layout"/>
+
+            <LinearLayout
+                android:id="@+id/show_method_layout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginVertical="16dp"
+                android:layout_marginHorizontal="24dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/separator1">
+
+                <TextView
+                    android:id="@+id/show_distance"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:padding="10dp"
+                    android:layout_marginEnd="16dp"
+                    android:text="거리순"
+                    android:textSize="14sp"
+                    android:textColor="@android:color/white"
+                    android:fontFamily="@font/app_main_font"
+                    android:background="@drawable/selected_box"
+                    android:onClick="@{() -> callback.setShowingMethodViewStyle(0)}"/>
+
+                <TextView
+                    android:id="@+id/show_remain_bikes"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:padding="10dp"
+                    android:text="남은 자전거순"
+                    android:textSize="14sp"
+                    android:textColor="#444444"
+                    android:fontFamily="@font/app_main_font"
+                    android:background="@drawable/not_selected_box"
+                    android:onClick="@{() -> callback.setShowingMethodViewStyle(1)}"/>
+
+            </LinearLayout>
+
+            <!--<TextView
+                android:layout_width="match_parent"
+                android:layout_height="240dp"
+                android:background="#8C85DD"
+                android:layout_marginTop="16dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/show_method_layout" />-->
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recycler"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_marginVertical="16dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/show_method_layout"
+                app:layout_constraintBottom_toBottomOf="parent"/>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="16dp"
-            android:layout_marginBottom="16dp"
-            android:backgroundTint="#ffffff"
-            android:src="@mipmap/ic_launcher"
-            android:scaleType="centerCrop"/>
+            android:orientation="vertical"
+            app:layout_anchor="@id/bottomSheet"
+            app:layout_anchorGravity="end"
+            android:layout_gravity="end">
 
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/findBikeFab"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="16dp"
-            android:layout_marginBottom="16dp"
-            android:backgroundTint="#ffffff"
-            android:src="@mipmap/ic_launcher"
-            android:scaleType="centerCrop"/>
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
+                android:id="@+id/myLocationFab"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="16dp"
+                android:layout_marginBottom="16dp"
+                android:backgroundTint="#ffffff"
+                android:src="@mipmap/ic_launcher"
+                android:scaleType="centerCrop"/>
 
-    </LinearLayout>
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
+                android:id="@+id/findBikeFab"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="16dp"
+                android:layout_marginBottom="16dp"
+                android:backgroundTint="#ffffff"
+                android:src="@mipmap/ic_launcher"
+                android:scaleType="centerCrop"/>
 
-</androidx.coordinatorlayout.widget.CoordinatorLayout>
+        </LinearLayout>
 
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
+
+
+</layout>

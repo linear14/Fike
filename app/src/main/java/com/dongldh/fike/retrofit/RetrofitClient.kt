@@ -4,14 +4,10 @@ import android.content.Context
 import android.os.AsyncTask
 import android.util.Log
 import android.widget.Toast
-import com.dongldh.fike.BuildConfig
 import com.dongldh.fike.data.AppDatabase
 import com.dongldh.fike.data.Station
 import com.dongldh.fike.data.StationPOJO
 import com.google.gson.GsonBuilder
-import net.daum.mf.map.api.MapPOIItem
-import net.daum.mf.map.api.MapPoint
-import net.daum.mf.map.api.MapView
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Call
@@ -44,6 +40,7 @@ class RetrofitClient(val context: Context) {
         return okhttpClientBuilder
     }
 
+    // 이걸 라이브 데이터로?
     val stationsList = mutableSetOf<Station>()
 
     fun getAllDatasFromRetrofit(start: Int, end: Int, total: Int) {
@@ -56,10 +53,10 @@ class RetrofitClient(val context: Context) {
             }
 
             override fun onResponse(call: Call<StationPOJO>, response: Response<StationPOJO>) {
-                Toast.makeText(context, "서버 접속 성공", Toast.LENGTH_SHORT).show()
+                // Toast.makeText(context, "서버 접속 성공", Toast.LENGTH_SHORT).show()
                 Log.d("retrofit", response?.body().toString())
                 if(response.isSuccessful) {
-                    Log.d("retrofitData", "데이터 받아오기 성공")
+                    // Log.d("retrofitData", "데이터 받아오기 성공")
 
                     val rentBikeStatus = response.body()!!.rentBikeStatus
                     val listTotalCount = rentBikeStatus.listTotalCount
@@ -86,6 +83,7 @@ class RetrofitClient(val context: Context) {
                         // 나중에 만들 progress bar 멈추도록 설정 + RoomDatabase에 insert (이런거 나중에 다 MVVM으로 바꾸자)
 
                         // deprecated 될 예정. 더 좋은 방법은?
+                        // 여기가 데이터베이스에 집어넣는 과정! ViewModel과의 연관성 찾아보자 (이 과정을 viewmodel에서 해줘야 할 것 같은데)
                         AsyncTask.execute {
                             val db = AppDatabase.getInstance(context.applicationContext)
                             db.stationDao().insertStations(stationsList)
