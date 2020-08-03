@@ -54,22 +54,12 @@ class MainActivity : AppCompatActivity(), MapView.MapViewEventListener, MapView.
                 }
             }
         }
-
+        RetrofitClient(applicationContext).getAllDatasFromRetrofit(1, 1000, 0)
         Permissions(this).permissionLocation()
-        // stationRepository = StationRepository.getInstance(StationDao)
+        mapViewAndBottomSheetInit()
         // Hash(this).getAppKeyHash()
 
-        map = MapView(this)
-        mapView.addView(map)
-        map.setZoomLevelFloat(DEFAULT_ZOOM_LEVEL, false)
-
         myLocationFab.setOnClickListener { findMyLocationAndMoveCamera() }
-
-        RetrofitClient(applicationContext).getAllDatasFromRetrofit(1, 1000, 0)
-
-        bottomSheetBehavior = BottomSheetBehavior.from(bottomSheet)
-        bottomSheetBehavior.halfExpandedRatio = 0.4f
-        bottomSheetBehavior.isFitToContents = false
 
         bottomSheetBehavior.addBottomSheetCallback(object: BottomSheetBehavior.BottomSheetCallback() {
             override fun onSlide(bottomSheet: View, slideOffset: Float) {
@@ -131,6 +121,18 @@ class MainActivity : AppCompatActivity(), MapView.MapViewEventListener, MapView.
 
     }
 
+    // 초기화
+    private fun mapViewAndBottomSheetInit() {
+        map = MapView(this)
+        mapView.addView(map)
+        map.setZoomLevelFloat(DEFAULT_ZOOM_LEVEL, false)
+
+        bottomSheetBehavior = BottomSheetBehavior.from(bottomSheet)
+        bottomSheetBehavior.halfExpandedRatio = 0.4f
+        bottomSheetBehavior.isFitToContents = false
+    }
+
+    // bottomSheet의 보는 방법 버튼을 눌렀을 때 디자인 바꿔주는 메서드
     private fun setShowingMethodStyle(selectedLayout: TextView, unselectedLayout: TextView) {
         selectedLayout.setTextColor(Color.WHITE)
         selectedLayout.setBackgroundResource(R.drawable.selected_box)
