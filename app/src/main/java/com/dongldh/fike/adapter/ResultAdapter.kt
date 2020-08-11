@@ -1,27 +1,46 @@
 package com.dongldh.fike.adapter
 
-import android.content.Context
-import android.graphics.Color
-import android.graphics.drawable.Drawable
-import android.text.Spannable
-import android.text.SpannableString
-import android.text.style.ForegroundColorSpan
-import android.util.Log
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
-import androidx.recyclerview.widget.LinearSmoothScroller
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import com.dongldh.fike.R
 import com.dongldh.fike.data.Station
-import com.dongldh.fike.util.DEFAULT_ZOOM_LEVEL
-import com.google.android.material.bottomsheet.BottomSheetBehavior
-import kotlinx.android.synthetic.main.item_result.view.*
-import net.daum.mf.map.api.CameraPosition
-import net.daum.mf.map.api.CameraUpdateFactory
-import net.daum.mf.map.api.MapPOIItem
-import net.daum.mf.map.api.MapView
+import com.dongldh.fike.databinding.ItemResultBinding
 
+class ResultAdapter: ListAdapter<Station, RecyclerView.ViewHolder>(StationDiffCallback()) {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
+        return ResultViewHolder(ItemResultBinding.inflate(LayoutInflater.from(parent.context), parent, false))
+    }
+
+    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
+        val station = getItem(position)
+        (holder as ResultViewHolder).bind(station)
+    }
+
+    class ResultViewHolder(private val binding: ItemResultBinding): RecyclerView.ViewHolder(binding.root) {
+        fun bind(item: Station) {
+            binding.apply {
+                station = item
+                executePendingBindings()
+            }
+        }
+    }
+
+}
+
+private class StationDiffCallback: DiffUtil.ItemCallback<Station>() {
+    override fun areItemsTheSame(oldItem: Station, newItem: Station): Boolean {
+        return oldItem.stationId == newItem.stationId
+    }
+
+    override fun areContentsTheSame(oldItem: Station, newItem: Station): Boolean {
+        return oldItem == newItem
+    }
+
+}
+
+/*
 class ResultViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
     val star = itemView.star_image
     val name = itemView.station_name
@@ -96,4 +115,4 @@ class ResultAdapter(
         notifyItemChanged(selectedPosition)
         selectedPosition = position
     }
-}
+}*/

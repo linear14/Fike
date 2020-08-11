@@ -149,7 +149,7 @@ class MainActivity : AppCompatActivity(), MapView.MapViewEventListener, MapView.
     // 어댑터 설정 다시하기 + bottomSheet 크기조절
     private fun changeRecyclerViewStateOnUiThread(list: MutableList<Pair<Station, Double>>) {
         runOnUiThread() {
-            resultAdapter = ResultAdapter(context = this, list = list, map = map, bottomSheetBehavior = bottomSheetBehavior, recycler = recycler)
+            // resultAdapter = ResultAdapter(context = this, list = list, map = map, bottomSheetBehavior = bottomSheetBehavior, recycler = recycler)
             bottomSheet.recycler.layoutManager = LinearLayoutManager(this)
             bottomSheet.recycler.adapter = resultAdapter
             if(bottomSheetBehavior.state != BottomSheetBehavior.STATE_EXPANDED) bottomSheetBehavior.state = BottomSheetBehavior.STATE_HALF_EXPANDED
@@ -267,7 +267,7 @@ class MainActivity : AppCompatActivity(), MapView.MapViewEventListener, MapView.
         for(index in 0 until selectedPairList.size) {
             if(selectedPairList[index].first.stationName == item.itemName) {
                 smoothScroller.targetPosition = index
-                resultAdapter.updateNotifyItemChanged(index)
+                // resultAdapter.updateNotifyItemChanged(index)
                 break
             }
         }
