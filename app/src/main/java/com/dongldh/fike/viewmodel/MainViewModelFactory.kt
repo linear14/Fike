@@ -2,12 +2,10 @@ package com.dongldh.fike.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.dongldh.fike.data.Station
 import com.dongldh.fike.data.StationRepository
 
 class MainViewModelFactory(
-    val stationRepository: StationRepository,
-    val stations: Set<Station>
+    val stationRepository: StationRepository
 ): ViewModelProvider.Factory {
 
     @Suppress("UNCHECKED_CAST")

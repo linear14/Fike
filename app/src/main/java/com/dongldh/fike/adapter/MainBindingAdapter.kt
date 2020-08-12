@@ -8,9 +8,9 @@ import android.widget.TextView
 import androidx.databinding.BindingAdapter
 
 @BindingAdapter(value = ["bind:distance", "bind:remain"])
-fun bindDistanceAndRemains(view: TextView, distance: Long, remain: Int) {
+fun bindDistanceAndRemains(view: TextView, distance: Int, remain: Int) {
     val string = "xm / y대"
-    val newString = string.replace("x", distance.toInt().toString()).replace("y", remain.toString())
+    val newString = string.replace("x", distance.toString()).replace("y", remain.toString())
 
     val spannable = SpannableString(newString)
     val slash = newString.indexOf("/")

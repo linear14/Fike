@@ -11,7 +11,7 @@ object InjectorUtils {
         return StationRepository.getInstance(AppDatabase.getInstance(context).stationDao())
     }
 
-    fun provideMainViewModelFactory(context: Context, stations: Set<Station>): MainViewModelFactory {
-        return MainViewModelFactory(getStationRepository(context), stations)
+    fun provideMainViewModelFactory(context: Context): MainViewModelFactory {
+        return MainViewModelFactory(getStationRepository(context))
     }
 }

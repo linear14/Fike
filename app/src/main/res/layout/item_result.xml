@@ -41,10 +41,9 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:textSize="12sp"
-            app:distance="@{300}"
+            app:distance="@{station.distance}"
             app:remain="@{station.parkingBikeTotCnt}"
-            />
-
+            tools:text="300m / 3대"/>
     </LinearLayout>
 
 </layout>

@@ -21,6 +21,7 @@ data class RentBikeStatus(
 
 ) {}
 
+// 데이터는 룸에 저장하지 않는걸로 (Room에는 나중에 즐겨찾기 정보만 저장)
 @Entity(tableName = "stations")
 data class Station(
     @SerializedName("stationId")
@@ -38,6 +39,7 @@ data class Station(
     val latitude: Double,
     @SerializedName("stationLongitude")
     @Expose
-    val longitude: Double
-
+    val longitude: Double,
+    @Expose
+    val distance: Int
 ) {}
