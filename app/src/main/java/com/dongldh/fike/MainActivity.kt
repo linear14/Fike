@@ -1,16 +1,13 @@
 package com.dongldh.fike
 
-import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
 import android.view.View
-import android.widget.TextView
 import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.observe
-import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.LinearSmoothScroller
 import androidx.recyclerview.widget.RecyclerView
 import com.dongldh.fike.adapter.ResultAdapter
@@ -25,8 +22,6 @@ import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.activity_main.view.*
 import net.daum.mf.map.api.*
 
-
-// 인터페이스를 이런식으로 액티비티 내에서 직접 구현해서 사용해야하네... object로 넣어주면 먹히지가 않음..ㅋㅋ
 class MainActivity : AppCompatActivity(), MapView.MapViewEventListener, MapView.CurrentLocationEventListener, MapView.POIItemEventListener {
 
     private val mainViewModel: MainViewModel by viewModels { InjectorUtils.provideMainViewModelFactory(this) }
@@ -35,55 +30,50 @@ class MainActivity : AppCompatActivity(), MapView.MapViewEventListener, MapView.
     var myLocationMapPoint: MapPoint? = null
 
     lateinit var bottomSheetBehavior: BottomSheetBehavior<View>
-    var nowResultStyle = 0 // 0 이면 거리순, 1 이면 남은 자전거순
-
-    lateinit var resultAdapter: ResultAdapter
-
-    // var stationRepository: StationRepository? = null
 
     @RequiresApi(Build.VERSION_CODES.M)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val binding = DataBindingUtil.setContentView<ActivityMainBinding>(this, R.layout.activity_main)
         binding.apply {
+            isOrderingByDistance = true
+
             callback = object: Callback {
                 override fun setShowingMethodViewStyle(selected: Int) {
-                    nowResultStyle = selected
-                    setShowingMethodStyle(
-                        if(selected == 0) bottomSheet.show_distance else bottomSheet.show_remain_bikes,
-                        if(selected == 0) bottomSheet.show_remain_bikes else bottomSheet.show_distance
-                    )
-                    // if(nowResultStyle == 0) listOrderingByDistance(selectedPairList) else listOrderingByRemainingBikes(selectedPairList)
+                    isOrderingByDistance = (selected == 0)
+                    if(selected == 0) {
+                        mainViewModel.listOrderingByDistance()
+                    } else {
+                        mainViewModel.listOrderingByRemainingBikes()
+                    }
                 }
             }
         }
+
         Permissions(this).permissionLocation()
         mapViewAndBottomSheetInit()
         // Hash(this).getAppKeyHash()
+
+        val adapter = ResultAdapter()
+        binding.recycler.adapter = adapter
 
         myLocationFab.setOnClickListener {
             findMyLocationAndMoveCamera()
         }
 
         findBikeFab.setOnClickListener {
+            if(bottomSheetBehavior.state != BottomSheetBehavior.STATE_HALF_EXPANDED) bottomSheetBehavior.state = BottomSheetBehavior.STATE_HALF_EXPANDED
             map.removeAllPOIItems()
             mainViewModel.getStationListFromRetrofit(
                 myLocationMapPoint?.mapPointGeoCoord?.latitude ?: map.mapCenterPoint.mapPointGeoCoord.latitude,
                 myLocationMapPoint?.mapPointGeoCoord?.longitude ?: map.mapCenterPoint.mapPointGeoCoord.longitude
-            ) // gps 켜져있으면 내 위치 기준. 안 켜져 있으면 지도 중심 기준
+            )
         }
 
         mainViewModel.stationList.observe(this) { result ->
-            for(station in result) {
-                val marker = MapPOIItem()
-                marker.itemName = station.stationName
-                marker.mapPoint = MapPoint.mapPointWithGeoCoord(station.latitude, station.longitude)
-                marker.markerType = MapPOIItem.MarkerType.BluePin // 기본으로 제공하는 BluePin 마커 모양.
-                marker.selectedMarkerType = MapPOIItem.MarkerType.RedPin // 마커를 클릭했을때, 기본으로 제공하는 RedPin 마커 모양.
-                map.addPOIItem(marker)
-            }
+            makeMarkersOnMap(result)
+            adapter.submitList(result)
         }
-
 
         bottomSheetBehavior.addBottomSheetCallback(object: BottomSheetBehavior.BottomSheetCallback() {
             override fun onSlide(bottomSheet: View, slideOffset: Float) {
@@ -109,6 +99,17 @@ class MainActivity : AppCompatActivity(), MapView.MapViewEventListener, MapView.
         map.setPOIItemEventListener(this)
     }
 
+    private fun makeMarkersOnMap(stations: List<Station>) {
+        for(station in stations) {
+            val marker = MapPOIItem()
+            marker.itemName = station.stationName
+            marker.mapPoint = MapPoint.mapPointWithGeoCoord(station.latitude, station.longitude)
+            marker.markerType = MapPOIItem.MarkerType.BluePin // 기본으로 제공하는 BluePin 마커 모양.
+            marker.selectedMarkerType = MapPOIItem.MarkerType.RedPin // 마커를 클릭했을때, 기본으로 제공하는 RedPin 마커 모양.
+            map.addPOIItem(marker)
+        }
+    }
+
     // 초기화
     private fun mapViewAndBottomSheetInit() {
         map = MapView(this)
@@ -120,45 +121,16 @@ class MainActivity : AppCompatActivity(), MapView.MapViewEventListener, MapView.
         bottomSheetBehavior.isFitToContents = false
     }
 
-    // bottomSheet의 보는 방법 버튼을 눌렀을 때 디자인 바꿔주는 메서드
-    private fun setShowingMethodStyle(selectedLayout: TextView, unselectedLayout: TextView) {
-        selectedLayout.setTextColor(Color.WHITE)
-        selectedLayout.setBackgroundResource(R.drawable.selected_box)
-        unselectedLayout.setTextColor(Color.DKGRAY)
-        unselectedLayout.setBackgroundResource(R.drawable.not_selected_box)
-    }
-
     // 내 위치(gps가 켜져 있을 경우) 표시하고, 카메라 이동시켜주기
     private fun findMyLocationAndMoveCamera() {
         map.currentLocationTrackingMode = MapView.CurrentLocationTrackingMode.TrackingModeOnWithoutHeading
         map.moveCamera(CameraUpdateFactory.newCameraPosition(CameraPosition(myLocationMapPoint, DEFAULT_ZOOM_LEVEL)))
     }
 
-    // 어댑터 설정 다시하기 + bottomSheet 크기조절
-    private fun changeRecyclerViewStateOnUiThread(list: MutableList<Pair<Station, Double>>) {
-        runOnUiThread() {
-            // resultAdapter = ResultAdapter(context = this, list = list, map = map, bottomSheetBehavior = bottomSheetBehavior, recycler = recycler)
-            bottomSheet.recycler.layoutManager = LinearLayoutManager(this)
-            bottomSheet.recycler.adapter = resultAdapter
-            if(bottomSheetBehavior.state != BottomSheetBehavior.STATE_EXPANDED) bottomSheetBehavior.state = BottomSheetBehavior.STATE_HALF_EXPANDED
-        }
-    }
-
-    // 거리순 리스트 정렬
-    private fun listOrderingByDistance(list: MutableList<Pair<Station, Double>>) {
-        list.sortBy { it.second }
-        changeRecyclerViewStateOnUiThread(list)
-    }
-
-    // 남은 자전거 대수순 리스트 정렬
-    private fun listOrderingByRemainingBikes(list: MutableList<Pair<Station, Double>>) {
-        list.sortByDescending { it.first.parkingBikeTotCnt }
-        changeRecyclerViewStateOnUiThread(list)
-    }
-
-
-
-    // 아 보기 싫다.. 아래부분 예쁘게 다른 클래스에서 처리할 수 없나..
+    /***
+     * listener 구현
+     * 보기 싫은데, 이렇게 안하면 오류가 발생함 (왜 그런지는 모르겠음)
+     * ***/
     // MapView.MapViewEventListener
     override fun onMapViewDoubleTapped(p0: MapView?, p1: MapPoint?) {
     }
@@ -228,15 +200,14 @@ class MainActivity : AppCompatActivity(), MapView.MapViewEventListener, MapView.
             }
         }
         // 선택한 아이템의 position을 구하고, recyclerView 맨 위에 보이도록 올려주는 작업
-        /*for(index in 0 until selectedPairList.size) {
-            if(selectedPairList[index].first.stationName == item.itemName) {
+        for((index, value) in mainViewModel.stationList.value!!.withIndex()) {
+            if(value.stationName == item.itemName) {
                 smoothScroller.targetPosition = index
                 // resultAdapter.updateNotifyItemChanged(index)
                 break
             }
-        }*/
+        }
         bottomSheet.recycler.layoutManager?.startSmoothScroll(smoothScroller)
-
     }
 
     interface Callback {

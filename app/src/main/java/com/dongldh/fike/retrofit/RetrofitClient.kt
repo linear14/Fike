@@ -53,6 +53,7 @@ object RetrofitClient {
                     } else {
                         // 나중에 만들 progress bar 멈추도록 설정 + RoomDatabase에 insert (이런거 나중에 다 MVVM으로 바꾸자)
 
+                        tempStationList.sortBy { it.distance }
                         stationList.value = tempStationList
                     }
 

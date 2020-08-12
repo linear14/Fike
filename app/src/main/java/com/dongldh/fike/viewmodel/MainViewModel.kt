@@ -1,5 +1,6 @@
 package com.dongldh.fike.viewmodel
 
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -18,6 +19,14 @@ class MainViewModel(
 
     fun getStationListFromRetrofit(latitude: Double, longitude: Double) {
         RetrofitClient.getAllDatasFromRetrofit(1, 1000, 0, stationList, latitude, longitude)
+    }
+
+    fun listOrderingByDistance() {
+        stationList.value = stationList.value?.sortedBy { it.distance }
+    }
+
+    fun listOrderingByRemainingBikes() {
+        stationList.value = stationList.value?.sortedByDescending { it.parkingBikeTotCnt }
     }
 
     // station 모두 insert
